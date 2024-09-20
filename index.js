@@ -4,6 +4,7 @@ const cors = require("cors");
 const { exec } = require("child_process");
 
 require("dotenv").config();
+const { searchKeyword, scrapeTweets } = require("./modules/puppeteer.js");
 
 const app = express();
 app.use(express.json());
@@ -20,29 +21,19 @@ const provider = new ethers.getDefaultProvider(
 const wallet = new ethers.Wallet(privateKey, provider);
 
 app.get("/tweet", async (req, res) => {
-	const scriptPath = "scripts/python/tweet_lookup/find_keyword.py";
-	const url = req.query.message || "https://x.com/blackstar_defi/status/1836007774893007235"; // Default URL if no argument is passed
-	
-	console.log("url from reactjs:", url)
-	
-	exec(`python ${scriptPath} "${url}"`, (error, stdout, stderr) => {
-		if (error) {
-			console.error(
-				`Error executing Python script: ${error.message}`
-			);
-			return;
-		}
-		if (stderr) {
-			console.error(`Python stderr: ${stderr}`);
-			return;
-		}
-		let boolValue = false
-		if (stdout.includes("True"))
-			boolValue=true
+	const url =
+		req.query.message ||
+		"https://x.com/blackstar_defi/status/1836007774893007235"; // Default URL if no argument is passed
 
-		console.log(`Boolean value from Python: ${typeof stdout} ${boolValue}`);
-		res.json({ verified: boolValue });
-	});
+	console.log("url from frontend:", url);
+
+	const tweets = await scrapeTweets(url, 5); // Scrape the top 5 tweets
+	const keyword = "Sky";
+
+	const foundStrings = searchKeyword(tweets, keyword);
+	console.log("Strings containing the keyword:", foundStrings);
+
+	res.json({ verified: foundStrings });
 });
 
 app.post("/send-eth", async (req, res) => {
