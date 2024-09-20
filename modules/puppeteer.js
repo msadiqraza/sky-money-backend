@@ -1,10 +1,19 @@
 const puppeteer = require("puppeteer");
+require('dotenv').config()
 
 // Function to initialize the Puppeteer browser
 async function initBrowser() {
 	const browser = await puppeteer.launch({
+		executablePath: process.env.NODE_ENV === 'production'
+			? process.env.PUPPETEER_EXECUTABLE_PATH
+			: puppeteer.executablePath(),
 		headless: true, // Run in headless mode
-		args: ["--start-maximized"],
+		args: [
+			"--disable-setuid-sandbox",
+			"--no-sandbox",
+			"--single-process",
+			"--no-zyogte"
+		],
 	});
 
 	const page = await browser.newPage();
