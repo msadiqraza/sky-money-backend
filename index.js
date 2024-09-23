@@ -20,6 +20,10 @@ const provider = new ethers.getDefaultProvider(
 );
 const wallet = new ethers.Wallet(privateKey, provider);
 
+app.get("/", async (req, res) => {
+	res.send("Hello World")
+})
+
 app.get("/tweet", async (req, res) => {
 	const url =
 		req.query.message ||

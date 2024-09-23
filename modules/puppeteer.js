@@ -12,8 +12,9 @@ async function initBrowser() {
 			"--disable-setuid-sandbox",
 			"--no-sandbox",
 			"--single-process",
-			"--no-zyogte"
+			"--no-zygote"
 		],
+		timeout: 60000
 	});
 
 	const page = await browser.newPage();
@@ -24,7 +25,7 @@ async function initBrowser() {
 // Function to scrape tweets from a given URL
 async function scrapeTweets(url, tweetCount = 5) {
 	const { browser, page } = await initBrowser();
-	await page.goto(url, { waitUntil: "networkidle2" });
+	await page.goto(url, { waitUntil: "networkidle2", timeout:0 });
 
 	// Wait for the page to load
 	await new Promise((resolve) => setTimeout(resolve, 10000));
