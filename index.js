@@ -1,10 +1,11 @@
 const express = require("express");
 const { ethers, parseEther } = require("ethers");
 const cors = require("cors");
-const { exec } = require("child_process");
 
 require("dotenv").config();
 const { searchKeyword, scrapeTweets } = require("./modules/puppeteer.js");
+const {insertUser} = require("./scripts/supabase/insertUser.js")
+const {findUser} = require("./scripts/supabase/findUser.js")
 
 const app = express();
 app.use(express.json());
@@ -22,6 +23,24 @@ const wallet = new ethers.Wallet(privateKey, provider);
 
 app.get("/", async (req, res) => {
 	res.send("Hello World")
+})
+
+
+app.get("/user/find", async (req, res) => {
+	const user = req.query.user
+	const wallet = req.query.wallet
+
+	console.log("username:", user, "password:", wallet)
+
+	const userFind = await findUser(user, wallet)
+	console.log("User find:", userFind)
+
+	if (!userFind) {
+		const insert = await insertUser(user, wallet);
+		console.log("insert successful:", insert);
+	}
+
+	res.json({userFound: !userFind, inserted:userFind})
 })
 
 app.get("/tweet", async (req, res) => {
